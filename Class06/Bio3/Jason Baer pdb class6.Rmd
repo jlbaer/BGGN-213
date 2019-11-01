@@ -1,0 +1,57 @@
+---
+title: "Bio3 JB"
+author: "Jason Baer"
+date: "10/18/2019"
+output: html_document
+---
+
+# Question 1 - read.pdb() function returns a list
+# Question 2 - trim.pdb() function trims the function by removing remarks and many xyz atoms
+# Question 3 - the input parameters top and bot would turn off the black and grey rectangles , which tells per-residue numeric vectors for a given protein structure
+# Question 4 - a clustered dendrogram to show similarity in B-factor trends would be more useful because you can see the similarity on the same plot. 
+# Question 5 - s1.b and s3.b are more similar in their B-factor trends which can be quantified in the cluster dendrogram shown below. rbind first compares based on B-factors (limits analysis to that row), then dist determines the distance between each, and then hclust creates a clustered hierarchy with the three variables. 
+# Question 6 - shown below 
+
+```{r}
+library(bio3d)
+pdb_reader <- function(x) {
+  s <- read.pdb(x) # reads pdb file of protein
+s.chainA <- trim.pdb(s, chain="A", elety="CA") # trims pdb list to only look at one side chain
+s.b <- s.chainA$atom$b # identifies values of b factor on specific side chain
+
+plotb3(s.b, sse=s.chainA, typ="l", ylab="Bfactor") # produces a plot to show b factor values on each residue
+
+}
+pdb_reader("4AKE")
+```
+
+```{r}
+library(bio3d)
+pdb_reader <- function(x) {
+  s <- read.pdb(x) # reads pdb file of protein
+s.chainA <- trim.pdb(s, chain="A", elety="CA") # trims pdb list to only look at one side chain
+s.b <- s.chainA$atom$b # identifies values of b factor on specific side chain
+
+plotb3(s.b, sse=s.chainA, typ="l", ylab="Bfactor") # produces a plot to show b factor values on each residue
+
+}
+pdb_reader("1AKE")
+```
+```{r}
+library(bio3d)
+pdb_reader <- function(x) {
+  s <- read.pdb(x) # reads pdb file of protein
+s.chainA <- trim.pdb(s, chain="A", elety="CA") # trims pdb list to only look at one side chain
+s.b <- s.chainA$atom$b # identifies values of b factor on specific side chain
+
+plotb3(s.b, sse=s.chainA, typ="l", ylab="Bfactor") # produces a plot to show b factor values on each residue
+
+}
+pdb_reader("1E4Y")
+```
+
+```
+
+
+
+

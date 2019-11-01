@@ -1,0 +1,113 @@
+---
+title: "Class06"
+author: "Jason Baer"
+date: "10/18/2019"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#This is a H1
+This is my class 6 work. This will be **bold**
+
+##A H2
+
+### A level 3 heading H3
+
+
+```{r}
+ test1r <- read.table("test1.txt", sep = ',', header = TRUE)
+test1r
+ test2r <- read.table('test2.txt', sep = '$', header = TRUE)
+ test2r
+ test3r <- read.table('test3.txt', sep = '', header = FALSE)
+ test3r
+```
+
+Our first silly function
+
+```{r}
+add <- function(x, y=1) {
+ # Sum the input x and y
+ x + y
+}
+```
+
+
+```{r}
+add(5,5)
+
+```
+```{r}
+add(c(5,6))
+```
+```{r}
+add( x = c(5,6,1,5,10), y = 100)
+
+```
+
+```{r}
+add(c(5, 5, NA, 7))
+```
+
+This wont work, need to write a function to do this lots of times
+
+
+then turn it into a function. you need a name, arguments and a body
+
+```{r}
+rescale <- function(x) {
+  rng <- range(x)
+  (x - rng[1] / rng[2] - rng[1])
+}
+```
+
+```{r}
+rescale(1:10)
+```
+
+```{r}
+rescale( c(1,2,NA,3,10) )
+```
+```{r}
+x <- c(1, 2, NA, 4)
+range(x)
+
+```
+help(range)
+
+```{r}
+rescale2 <- function(x) {
+  rng <- range(x, na.rm = TRUE)
+  (x - rng[1] / rng[2] - rng[1])
+}
+```
+
+```{r}
+rescale2( c(1,2,NA,3,10) )
+```
+
+
+```{r}
+rescale3 <- function(x, na.rm=TRUE, plot=FALSE) {
+ if(na.rm) {
+ rng <-range(x, na.rm=na.rm)
+ } else {
+ rng <-range(x)
+ }
+ print("Hello")
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ print("is it me you are looking for?")
+ if(plot) {
+ plot(answer, typ="b", lwd=4)
+ }
+ print("I can see it in ...")
+}
+```
+
+```{r}
+rescale3(1:10, plot = TRUE)
+```
+
