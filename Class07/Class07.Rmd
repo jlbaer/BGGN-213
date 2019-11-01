@@ -1,0 +1,110 @@
+---
+title: "Class07"
+author: "Jason Baer"
+date: "10/23/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# revisit our functions from last day
+
+```{r}
+source("http://tinyurl.com/rescale-R")
+```
+
+#lets try our rescale() function
+
+```{r}
+rescale(1:10)
+```
+
+```{r}
+rescale( c(3, 10, NA, 7) )
+```
+
+
+```{r}
+x <- c(1, 2, NA, 3, NA)
+y<- c(NA, 3, NA, 3, 4)
+
+is.na(x)
+is.na(y)
+```
+
+```{r}
+which(is.na(x))
+```
+
+
+Working snippet of code
+```{r}
+is.na(x) & is.na(y)
+```
+
+```{r}
+both_na <- function(x , y) {
+  sum(is.na(x) & is.na(y))
+}
+```
+
+```{r}
+both_na(x, y)
+```
+
+# R recycles vector values, just like it does for colors!! it takes the shorter value and makes it as long as the longer value by RECYCLING
+
+## Check for NA elements in both input vectors and don't allow re-cycling
+```{r}
+both_na2 <- function(x , y) {
+  ## Check for NA elements in both input vectors and don't allow re-cycling
+  if (length(x) != length(y)) {
+   stop("Input values should be the same length")
+ }
+   sum(is.na(x) & is.na(y))
+}
+```
+
+
+```{r}
+function(x, y) {
+  ## Print some info on where NA's are as well as the number of them 
+  if(length(x) != length(y)) {
+    stop("Input x and y should be vectors of the same length", call.=FALSE)
+  }
+  na.in.both <- ( is.na(x) & is.na(y) )
+  na.number  <- sum(na.in.both)
+  na.which   <- which(na.in.both)
+
+  message("Found ", na.number, " NA's at position(s):", 
+          paste(na.which, collapse=", ") ) 
+  
+  return( list(number=na.number, which=na.which) )
+}
+```
+
+
+```{r}
+s1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
+s2 <- c(100, NA, 90, 90, 90, 90, 97, 80)
+
+final_grade <- function(x) {
+  x[is.na(x)] <- 0 #convert all NAs to 0
+  mean(x[-which.min(x)], na.rm = TRUE) #takes the mean of all of a vector, subtracting the lowest value
+}
+```
+
+```{r}
+final_grade(s2)
+```
+
+```{r}
+all_grades <- read.csv("http://tinyurl.com/gradeinput")
+rownames(all_grades) <- all_grades[,1]
+
+apply(all_grades[,-1], 1, final_grade)
+
+```
+
