@@ -1,2 +1,2 @@
-# how-was-your-souffle
-classwork bggn 213 (class 10)
+# Bioinformatics Class
+This is my work from BGGN213 at UCSD. 
