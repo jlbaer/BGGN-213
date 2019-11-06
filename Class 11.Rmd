@@ -67,3 +67,9 @@ ligand_only <- atom.select(pdb, 'ligand', value = TRUE)
 write.pdb(ligand_only, file = "1hsg_lig.pdb")
 ```
 
+```{r}
+library(bio3d.view)
+#view(lig)
+view(pdb, "overview", col = "sse")
+```
+
