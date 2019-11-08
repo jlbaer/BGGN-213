@@ -91,3 +91,16 @@ read.pdb("1hsg_protein.pdb")
     ##       VNIIGRNLLTQIGCTLNF
     ## 
     ## + attr: atom, xyz, calpha, call
+
+``` r
+res <- read.pdb("all.pdbqt", multi = TRUE)
+write.pdb(res, "results.pdb")
+```
+
+``` r
+ori <- read.pdb("ligand.pdbqt")
+rmsd(ori, res)
+```
+
+    ##  [1] 30.946 31.634 31.442 32.688 31.852 30.442 32.523 32.559 31.896 30.715
+    ## [11] 30.334 31.545 31.127 29.882 32.830 31.246 30.142

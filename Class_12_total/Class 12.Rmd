@@ -38,3 +38,14 @@ protein <- atom.select(pdb, "protein", value = TRUE)
 write.pdb(protein, file = "1hsg_protein.pdb")
 read.pdb("1hsg_protein.pdb")
 ```
+
+```{r}
+res <- read.pdb("all.pdbqt", multi = TRUE)
+write.pdb(res, "results.pdb")
+```
+
+```{r}
+ori <- read.pdb("ligand.pdbqt")
+rmsd(ori, res)
+```
+
