@@ -47,6 +47,6 @@ write.pdb(res, "results.pdb")
 ```{r}
 ori <- read.pdb("ligand.pdbqt")
 rmsd(ori, res)
-#this will help
+#this will help 
 ```
 
