@@ -1,0 +1,104 @@
+---
+title: "Class 14"
+author: "Jason Baer"
+date: "11/13/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r eval = FALSE}
+intall.packages("BiocManager")
+BiocManager::install("DESeq2")
+library(BiocManager)
+library(DESeq2)
+```
+
+
+```{r}
+counts <- read.csv("airway_scaledcounts.csv", stringsAsFactors = FALSE)
+counts
+
+```
+
+```{r}
+metadata <- read.csv("airway_metadata.csv", stringsAsFactors = FALSE)
+metadata
+
+```
+
+Q1: How many genes are in the dataset?
+
+```{r}
+nrow(counts)
+```
+
+How many experiments?
+
+```{r}
+ncol(counts) - 1
+```
+
+Lets make sure metadata id col matches the colnames of counts
+
+```{r}
+all(colnames(counts)[-1] == metadata$id )
+```
+
+
+Q2: How many control cell lines do we have?
+
+```{r}
+metadata$dex == "control"
+```
+
+First we want to access the columns of countData that are control and then find their mean.
+
+```{r}
+control.id <- metadata[metadata$dex == "control", ]$id
+control.id
+```
+
+
+```{r}
+control.mean <- rowSums(counts[, control.id])/length(control.id)
+names(control.mean) <- counts$ensgene
+head(control.mean)
+```
+
+
+Then we can do the same for treated samples
+
+```{r}
+treated.id <- metadata[metadata$dex == "treated", ]$id
+treated.id
+```
+
+
+```{r}
+treated.mean <- rowSums(counts[ ,treated.id]) / length(treated.id)
+names(treated.mean) <- counts$ensgene
+head(treated.mean)
+```
+
+Combine meancount data into a dataframe
+
+```{r}
+meancounts <- data.frame(control.mean, treated.mean)
+meancounts
+```
+
+Plot control vs treated
+
+```{r}
+plot(meancounts$control.mean, meancounts$treated.mean, xlab = "Control Mean", ylab = "Treated Mean")
+```
+
+Plot both of these on a log scale
+
+```{r}
+plot(meancounts$control.mean, meancounts$treated.mean, xlab = "Control Mean", ylab = "Treated Mean", log = "xy")
+```
+
