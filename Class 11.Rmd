@@ -1,0 +1,75 @@
+---
+title: "Untitled"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## What is in the PDB database
+
+
+```{r}
+library(readr)
+data <- read.csv("Data Export Summary.csv")
+#View(Data_Export_Summary)
+```
+
+
+##Q1. Determine the percentage of structures solved by X-Ray and Electron Microscopy
+
+```{r}
+sum(data$Total)
+```
+
+```{r}
+ans <- data$Total/sum(data$Total) * 100
+names(ans) <- data$Experimental.Method
+round(ans,2)
+```
+
+##Q2. What proportion of structures are protein
+
+```{r}
+round( sum(data$Proteins) / sum(data$Total), 2) * 100
+```
+
+```{r}
+library(bio3d)
+pdb <- read.pdb("1hsg.pdb")
+pdb
+```
+
+```{r}
+pdb$atom[1, "resid"]
+```
+
+```{r}
+attributes(pdb)
+```
+
+```{r}
+aa321(pdb$atom[pdb$calpha, "resid"]) #makes all amino acid names 1 letter
+```
+
+
+## Use the Bio3D   function to write out a protein only PDB file for viewing in VMD. Also write out a second separate PDB file for the ligand with residue name MK1
+
+```{r} 
+protein_only <- atom.select(pdb, 'protein', value = TRUE)
+write.pdb(protein_only, file = "1hsg_prot.pdb")
+```
+
+
+```{r}
+ligand_only <- atom.select(pdb, 'ligand', value = TRUE)
+write.pdb(ligand_only, file = "1hsg_lig.pdb")
+```
+
+```{r}
+library(bio3d.view)
+#view(lig)
+view(pdb, "overview", col = "sse")
+```
+
