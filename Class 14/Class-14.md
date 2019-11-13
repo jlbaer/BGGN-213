@@ -61086,6 +61086,12 @@ head(mycounts)
     ## ENSG00000000971      5219.00      6687.50  0.35769358
     ## ENSG00000001036      2327.00      1785.75 -0.38194109
 
+``` r
+nrow(mycounts)
+```
+
+    ## [1] 21817
+
 Test for finding zero entries
 
 ``` r
@@ -61120,7 +61126,7 @@ A common threshold used for calling something differentially expressed is a log2
 ``` r
 up.ind <- mycounts$log2fc > 2
 down.ind <- mycounts$log2fc < (-2)
-length(which(up.ind, arr.ind = TRUE))
+length(which(up.ind, arr.ind = TRUE)) #can also use sum(up.ind)
 ```
 
     ## [1] 250
@@ -61130,3 +61136,340 @@ length(which(down.ind, arr.ind = TRUE))
 ```
 
     ## [1] 367
+
+``` r
+anno <- read.csv("annotables_grch38.csv")
+head(anno)
+```
+
+    ##           ensgene entrez   symbol chr     start       end strand
+    ## 1 ENSG00000000003   7105   TSPAN6   X 100627109 100639991     -1
+    ## 2 ENSG00000000005  64102     TNMD   X 100584802 100599885      1
+    ## 3 ENSG00000000419   8813     DPM1  20  50934867  50958555     -1
+    ## 4 ENSG00000000457  57147    SCYL3   1 169849631 169894267     -1
+    ## 5 ENSG00000000460  55732 C1orf112   1 169662007 169854080      1
+    ## 6 ENSG00000000938   2268      FGR   1  27612064  27635277     -1
+    ##          biotype
+    ## 1 protein_coding
+    ## 2 protein_coding
+    ## 3 protein_coding
+    ## 4 protein_coding
+    ## 5 protein_coding
+    ## 6 protein_coding
+    ##                                                                                                  description
+    ## 1                                                          tetraspanin 6 [Source:HGNC Symbol;Acc:HGNC:11858]
+    ## 2                                                            tenomodulin [Source:HGNC Symbol;Acc:HGNC:17757]
+    ## 3 dolichyl-phosphate mannosyltransferase polypeptide 1, catalytic subunit [Source:HGNC Symbol;Acc:HGNC:3005]
+    ## 4                                               SCY1-like, kinase-like 3 [Source:HGNC Symbol;Acc:HGNC:19285]
+    ## 5                                    chromosome 1 open reading frame 112 [Source:HGNC Symbol;Acc:HGNC:25565]
+    ## 6                          FGR proto-oncogene, Src family tyrosine kinase [Source:HGNC Symbol;Acc:HGNC:3697]
+
+We will use Bioconductor's annotation packages to help with mapping various ID schemes to each other. Here we load the AnnotationDBI package and the annotation package org.Hs.eg.db. Lets see whats available in org.Hs
+
+``` r
+library("AnnotationDbi")
+```
+
+    ## Loading required package: stats4
+
+    ## Loading required package: BiocGenerics
+
+    ## Loading required package: parallel
+
+    ## 
+    ## Attaching package: 'BiocGenerics'
+
+    ## The following objects are masked from 'package:parallel':
+    ## 
+    ##     clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    ##     clusterExport, clusterMap, parApply, parCapply, parLapply,
+    ##     parLapplyLB, parRapply, parSapply, parSapplyLB
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     IQR, mad, sd, var, xtabs
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     anyDuplicated, append, as.data.frame, basename, cbind,
+    ##     colnames, dirname, do.call, duplicated, eval, evalq, Filter,
+    ##     Find, get, grep, grepl, intersect, is.unsorted, lapply, Map,
+    ##     mapply, match, mget, order, paste, pmax, pmax.int, pmin,
+    ##     pmin.int, Position, rank, rbind, Reduce, rownames, sapply,
+    ##     setdiff, sort, table, tapply, union, unique, unsplit, which,
+    ##     which.max, which.min
+
+    ## Loading required package: Biobase
+
+    ## Welcome to Bioconductor
+    ## 
+    ##     Vignettes contain introductory material; view with
+    ##     'browseVignettes()'. To cite Bioconductor, see
+    ##     'citation("Biobase")', and for packages 'citation("pkgname")'.
+
+    ## Loading required package: IRanges
+
+    ## Loading required package: S4Vectors
+
+    ## 
+    ## Attaching package: 'S4Vectors'
+
+    ## The following object is masked from 'package:base':
+    ## 
+    ##     expand.grid
+
+``` r
+library("org.Hs.eg.db")
+```
+
+    ## 
+
+``` r
+columns(org.Hs.eg.db)
+```
+
+    ##  [1] "ACCNUM"       "ALIAS"        "ENSEMBL"      "ENSEMBLPROT" 
+    ##  [5] "ENSEMBLTRANS" "ENTREZID"     "ENZYME"       "EVIDENCE"    
+    ##  [9] "EVIDENCEALL"  "GENENAME"     "GO"           "GOALL"       
+    ## [13] "IPI"          "MAP"          "OMIM"         "ONTOLOGY"    
+    ## [17] "ONTOLOGYALL"  "PATH"         "PFAM"         "PMID"        
+    ## [21] "PROSITE"      "REFSEQ"       "SYMBOL"       "UCSCKG"      
+    ## [25] "UNIGENE"      "UNIPROT"
+
+We will add a new column in mycounts called symbol.
+
+``` r
+mycounts$symbol <- mapIds(org.Hs.eg.db,
+                     keys=row.names(mycounts), # Our genenames
+                     keytype="ENSEMBL",        # The format of our genenames
+                     column="SYMBOL",          # The new format we want to add
+                     multiVals="first")
+```
+
+    ## 'select()' returned 1:many mapping between keys and columns
+
+``` r
+head(mycounts)
+```
+
+    ##                 control.mean treated.mean      log2fc   symbol
+    ## ENSG00000000003       900.75       658.00 -0.45303916   TSPAN6
+    ## ENSG00000000419       520.50       546.00  0.06900279     DPM1
+    ## ENSG00000000457       339.75       316.50 -0.10226805    SCYL3
+    ## ENSG00000000460        97.25        78.75 -0.30441833 C1orf112
+    ## ENSG00000000971      5219.00      6687.50  0.35769358      CFH
+    ## ENSG00000001036      2327.00      1785.75 -0.38194109    FUCA2
+
+Run the mapIds() function two more times to add the Entrez ID and UniProt accession as new columns called mycountsentrez and mycountsuniprot
+
+``` r
+mycounts$entrez <- mapIds(org.Hs.eg.db,
+                     keys=row.names(mycounts),
+                     column="ENTREZID",
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+    ## 'select()' returned 1:many mapping between keys and columns
+
+``` r
+mycounts$uniprot <- mapIds(org.Hs.eg.db,
+                     keys=row.names(mycounts),
+                     column="UNIPROT",
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+    ## 'select()' returned 1:many mapping between keys and columns
+
+``` r
+head(mycounts)
+```
+
+    ##                 control.mean treated.mean      log2fc   symbol entrez
+    ## ENSG00000000003       900.75       658.00 -0.45303916   TSPAN6   7105
+    ## ENSG00000000419       520.50       546.00  0.06900279     DPM1   8813
+    ## ENSG00000000457       339.75       316.50 -0.10226805    SCYL3  57147
+    ## ENSG00000000460        97.25        78.75 -0.30441833 C1orf112  55732
+    ## ENSG00000000971      5219.00      6687.50  0.35769358      CFH   3075
+    ## ENSG00000001036      2327.00      1785.75 -0.38194109    FUCA2   2519
+    ##                    uniprot
+    ## ENSG00000000003 A0A024RCI0
+    ## ENSG00000000419     O60762
+    ## ENSG00000000457     Q8IZE3
+    ## ENSG00000000460 A0A024R922
+    ## ENSG00000000971 A0A024R962
+    ## ENSG00000001036     Q9BTY2
+
+``` r
+library(DESeq2)
+```
+
+    ## Loading required package: GenomicRanges
+
+    ## Loading required package: GenomeInfoDb
+
+    ## Loading required package: SummarizedExperiment
+
+    ## Loading required package: DelayedArray
+
+    ## Loading required package: matrixStats
+
+    ## 
+    ## Attaching package: 'matrixStats'
+
+    ## The following objects are masked from 'package:Biobase':
+    ## 
+    ##     anyMissing, rowMedians
+
+    ## Loading required package: BiocParallel
+
+    ## 
+    ## Attaching package: 'DelayedArray'
+
+    ## The following objects are masked from 'package:matrixStats':
+    ## 
+    ##     colMaxs, colMins, colRanges, rowMaxs, rowMins, rowRanges
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     aperm, apply, rowsum
+
+``` r
+citation("DESeq2")
+```
+
+    ## 
+    ##   Love, M.I., Huber, W., Anders, S. Moderated estimation of fold
+    ##   change and dispersion for RNA-seq data with DESeq2 Genome
+    ##   Biology 15(12):550 (2014)
+    ## 
+    ## A BibTeX entry for LaTeX users is
+    ## 
+    ##   @Article{,
+    ##     title = {Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2},
+    ##     author = {Michael I. Love and Wolfgang Huber and Simon Anders},
+    ##     year = {2014},
+    ##     journal = {Genome Biology},
+    ##     doi = {10.1186/s13059-014-0550-8},
+    ##     volume = {15},
+    ##     issue = {12},
+    ##     pages = {550},
+    ##   }
+
+``` r
+dds <- DESeqDataSetFromMatrix(countData=counts, 
+                              colData=metadata, 
+                              design=~dex, 
+                              tidy=TRUE)
+```
+
+    ## converting counts to integer mode
+
+    ## Warning in DESeqDataSet(se, design = design, ignoreRank): some variables in
+    ## design formula are characters, converting to factors
+
+``` r
+dds
+```
+
+    ## class: DESeqDataSet 
+    ## dim: 38694 8 
+    ## metadata(1): version
+    ## assays(1): counts
+    ## rownames(38694): ENSG00000000003 ENSG00000000005 ...
+    ##   ENSG00000283120 ENSG00000283123
+    ## rowData names(0):
+    ## colnames(8): SRR1039508 SRR1039509 ... SRR1039520 SRR1039521
+    ## colData names(4): id dex celltype geo_id
+
+running DESeq main package
+
+``` r
+dds <- DESeq(dds)
+```
+
+    ## estimating size factors
+
+    ## estimating dispersions
+
+    ## gene-wise dispersion estimates
+
+    ## mean-dispersion relationship
+
+    ## final dispersion estimates
+
+    ## fitting model and testing
+
+call results
+
+``` r
+res <- results(dds)
+res
+```
+
+    ## log2 fold change (MLE): dex treated vs control 
+    ## Wald test p-value: dex treated vs control 
+    ## DataFrame with 38694 rows and 6 columns
+    ##                          baseMean     log2FoldChange             lfcSE
+    ##                         <numeric>          <numeric>         <numeric>
+    ## ENSG00000000003  747.194195359907 -0.350703020686579 0.168245681332529
+    ## ENSG00000000005                 0                 NA                NA
+    ## ENSG00000000419  520.134160051965  0.206107766417861 0.101059218008052
+    ## ENSG00000000457  322.664843927049 0.0245269479387471 0.145145067649248
+    ## ENSG00000000460   87.682625164828  -0.14714204922212 0.257007253994673
+    ## ...                           ...                ...               ...
+    ## ENSG00000283115                 0                 NA                NA
+    ## ENSG00000283116                 0                 NA                NA
+    ## ENSG00000283119                 0                 NA                NA
+    ## ENSG00000283120 0.974916032393564  -0.66825846051647  1.69456285241871
+    ## ENSG00000283123                 0                 NA                NA
+    ##                               stat             pvalue              padj
+    ##                          <numeric>          <numeric>         <numeric>
+    ## ENSG00000000003   -2.0844696749953 0.0371174658432827 0.163034808641681
+    ## ENSG00000000005                 NA                 NA                NA
+    ## ENSG00000000419    2.0394751758463 0.0414026263001167 0.176031664879168
+    ## ENSG00000000457  0.168982303952746  0.865810560623561 0.961694238404388
+    ## ENSG00000000460  -0.57252099672319  0.566969065257939 0.815848587637724
+    ## ...                            ...                ...               ...
+    ## ENSG00000283115                 NA                 NA                NA
+    ## ENSG00000283116                 NA                 NA                NA
+    ## ENSG00000283119                 NA                 NA                NA
+    ## ENSG00000283120 -0.394354484734893  0.693319342566817                NA
+    ## ENSG00000283123                 NA                 NA                NA
+
+volcano plot
+============
+
+``` r
+plot(res$log2FoldChange, res$padj)
+```
+
+![](Class-14_files/figure-markdown_github/unnamed-chunk-29-1.png)
+
+``` r
+plot(res$log2FoldChange, -log(res$padj))
+```
+
+![](Class-14_files/figure-markdown_github/unnamed-chunk-30-1.png)
+
+To color the points we will setup a custom color vector indicating transcripts with large fold change and significant differences between conditions
+
+``` r
+# Setup our custom point color vector 
+mycols <- rep("gray", nrow(res))
+mycols[ abs(res$log2FoldChange) > 2 ]  <- "red" 
+
+inds <- (res$padj < 0.01) & (abs(res$log2FoldChange) > 2 )
+mycols[ inds ] <- "blue"
+
+# Volcano plot with custom colors 
+plot( res$log2FoldChange,  -log(res$padj), 
+ col=mycols, ylab="-Log(P-value)", xlab="Log2(FoldChange)" )
+
+# Cut-off lines
+abline(v=c(-2,2), col="gray", lty=2)
+abline(h=-log(0.1), col="gray", lty=2)
+```
+
+![](Class-14_files/figure-markdown_github/unnamed-chunk-31-1.png)
