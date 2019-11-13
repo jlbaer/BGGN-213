@@ -102,3 +102,40 @@ Plot both of these on a log scale
 plot(meancounts$control.mean, meancounts$treated.mean, xlab = "Control Mean", ylab = "Treated Mean", log = "xy")
 ```
 
+Fold change. negative numbers mean fold change is going down, positive mean it is going up. -inf means negative infinity (taking log of zero), so genes that have zero expression. 
+
+```{r}
+meancounts$log2fc <- log2(meancounts[,"treated.mean"]/meancounts[,"control.mean"])
+head(meancounts)
+```
+
+Lets filter out genes with no expression and NaN
+
+```{r}
+zero.vals <- which(meancounts[,1:2]==0, arr.ind=TRUE)
+
+to.rm <- unique(zero.vals[,1])
+mycounts <- meancounts[-to.rm,]
+head(mycounts)
+```
+
+
+Test for finding zero entries
+
+```{r}
+x <- data.frame(happy = c(5,6,0,0), sad = c(0,5,5,0))
+x == 0
+which(x == 0)
+
+which(x == 0, arr.ind = TRUE)
+```
+
+A common threshold used for calling something differentially expressed is a log2(FoldChange) of greater than 2 or less than -2. Let’s filter the dataset both ways to see how many genes are up or down-regulated.
+
+```{r}
+up.ind <- mycounts$log2fc > 2
+down.ind <- mycounts$log2fc < (-2)
+length(which(up.ind, arr.ind = TRUE))
+length(which(down.ind, arr.ind = TRUE))
+```
+

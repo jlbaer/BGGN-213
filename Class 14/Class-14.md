@@ -61052,3 +61052,81 @@ plot(meancounts$control.mean, meancounts$treated.mean, xlab = "Control Mean", yl
     ## omitted from logarithmic plot
 
 ![](Class-14_files/figure-markdown_github/unnamed-chunk-14-1.png)
+
+Fold change. negative numbers mean fold change is going down, positive mean it is going up. -inf means negative infinity (taking log of zero), so genes that have zero expression.
+
+``` r
+meancounts$log2fc <- log2(meancounts[,"treated.mean"]/meancounts[,"control.mean"])
+head(meancounts)
+```
+
+    ##                 control.mean treated.mean      log2fc
+    ## ENSG00000000003       900.75       658.00 -0.45303916
+    ## ENSG00000000005         0.00         0.00         NaN
+    ## ENSG00000000419       520.50       546.00  0.06900279
+    ## ENSG00000000457       339.75       316.50 -0.10226805
+    ## ENSG00000000460        97.25        78.75 -0.30441833
+    ## ENSG00000000938         0.75         0.00        -Inf
+
+Lets filter out genes with no expression and NaN
+
+``` r
+zero.vals <- which(meancounts[,1:2]==0, arr.ind=TRUE)
+
+to.rm <- unique(zero.vals[,1])
+mycounts <- meancounts[-to.rm,]
+head(mycounts)
+```
+
+    ##                 control.mean treated.mean      log2fc
+    ## ENSG00000000003       900.75       658.00 -0.45303916
+    ## ENSG00000000419       520.50       546.00  0.06900279
+    ## ENSG00000000457       339.75       316.50 -0.10226805
+    ## ENSG00000000460        97.25        78.75 -0.30441833
+    ## ENSG00000000971      5219.00      6687.50  0.35769358
+    ## ENSG00000001036      2327.00      1785.75 -0.38194109
+
+Test for finding zero entries
+
+``` r
+x <- data.frame(happy = c(5,6,0,0), sad = c(0,5,5,0))
+x == 0
+```
+
+    ##      happy   sad
+    ## [1,] FALSE  TRUE
+    ## [2,] FALSE FALSE
+    ## [3,]  TRUE FALSE
+    ## [4,]  TRUE  TRUE
+
+``` r
+which(x == 0)
+```
+
+    ## [1] 3 4 5 8
+
+``` r
+which(x == 0, arr.ind = TRUE)
+```
+
+    ##      row col
+    ## [1,]   3   1
+    ## [2,]   4   1
+    ## [3,]   1   2
+    ## [4,]   4   2
+
+A common threshold used for calling something differentially expressed is a log2(FoldChange) of greater than 2 or less than -2. Let’s filter the dataset both ways to see how many genes are up or down-regulated.
+
+``` r
+up.ind <- mycounts$log2fc > 2
+down.ind <- mycounts$log2fc < (-2)
+length(which(up.ind, arr.ind = TRUE))
+```
+
+    ## [1] 250
+
+``` r
+length(which(down.ind, arr.ind = TRUE))
+```
+
+    ## [1] 367
